@@ -88,22 +88,77 @@ function hasEntry(obj: never, key: string): boolean {
     return hasKey(obj, key) && getValues(obj).includes(obj[key]);
 }
 
-function getValueInPath(obj: never, path: string) {
+
+function getValueInPath(obj: never, path: string): never | never [] | null {
     const parts = path.split('.');
     let result = obj;
     for (const part of parts) {
         if (result && hasKey(result, part)) {
             result = result[part];
         } else {
-            return undefined;
+            return null;
         }
     }
     return result;
 }
 
 
+function isArrayInPath(obj: never, path: string) {
+    return isArray(obj[path])
+}
+
+function getValuesInArray(value: never[], path: string): never[] {
+
+    let values: never[] = []
+    for (let i = 0; i < value.length; i++) {
+        const targetValue = value[i]
+
+        if (containsArray(targetValue, path)) {
+            const paths = path.split('.')
+
+            for (const p of paths) {
+
+                if (isArray(targetValue[p])) {
+                    const index = paths.indexOf(p)
+                    if (paths.length > index) {
+                        return getValuesInArray(targetValue[p], paths.filter(x => paths.indexOf(x) > index).join('.'))
+                    }
+                    return targetValue[p]
+                }
+
+
+            }
+
+
+        } else {
+            values = value.map(x => getValueInPath(x, path)).filter(x => x != null) as never[] | never;
+        }
+    }
+    return values as never[];
+}
+
+
+function containsArray(value: never, path: string) {
+    const parts = path.split('.');
+    let result = value;
+    for (const part of parts) {
+        if (result && hasKey(result, part)) {
+            result = result[part];
+            if (isArray(result)) {
+                return true;
+            }
+        } else {
+            return false
+                ;
+        }
+    }
+    return isArray(result);
+}
+
+
 export {
     isArray,
+    isArrayInPath,
     isObjectEmpty,
     hasKey,
     hasEntry,
@@ -116,4 +171,5 @@ export {
     isNumber,
     isString,
     getPropertyNames,
+    getValuesInArray
 }
