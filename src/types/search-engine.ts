@@ -1,6 +1,6 @@
 import {Operator} from "@/types/filter-data.ts";
-import {isEqual} from "@/lib/values.ts";
-import {getValueInPath, isArray} from "@/lib/objects.ts";
+import {isEqual, isGreaterThanOrEqual} from "@/lib/values.ts";
+import {containsArray, getValueInPath, getValuesInArray, isArray} from "@/lib/objects.ts";
 
 export type SearchParams = {
     field: string,
@@ -10,14 +10,14 @@ export type SearchParams = {
 
 
 export interface SearchEngine<T> {
-    search(params: SearchParams[], target: T | T[]): T | T[];
+    search(params: SearchParams[], target: T | T[]): Promise<T> | Promise<T[]>;
 
 }
 
 
 export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
 
-    abstract search(params: SearchParams[], target: T | T[]): T | T[];
+    abstract search(params: SearchParams[], target: T | T[]): Promise<T> | Promise<T[]>;
 
 
     protected isMatch(searchParams: SearchParams, target: T | T[]): boolean {
@@ -25,20 +25,26 @@ export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
         if (!field || !operator || !value) {
             return false;
         }
-        if (!isArray(target)) {
-            const targetValue = getValueInPath(target as never, field) as T;
-            // return isEqual(targetValue, value, operator);
 
-            return this.isMath(operator, targetValue, value);
-        } else {
-            for (const item of target) {
-                if (this.isMatch(searchParams, item)) {
-                    return true;
+        if (isArray(target)) {
+            if (containsArray(target as never, field)) {
+                const values = getValuesInArray(target as never[], field)
+                for (const item of values) {
+                    if (this.isMatch(searchParams, item)) {
+                        return true;
+                    }
                 }
             }
+        } else {
+            const targetValue = getValueInPath(target as never, field) as T;
+            if (this.isMath(operator, targetValue, value)) {
+                return true;
+            }
         }
+
         return false;
     }
+
 
     protected isAllMatch(searchParams: SearchParams[], target: T | T[]): boolean {
         for (const item of searchParams) {
@@ -51,12 +57,15 @@ export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
 
     private isMath(operator: Operator, targetValue: T, value: unknown) {
         switch (operator) {
-            case Operator.IGUAL:
+            case Operator.EQUAL:
                 return isEqual(targetValue, value);
-            case Operator.MENOR:
-                return false
-            // return targetValue < value;
-            case Operator.DIFERENTE:
+            case Operator.LESS_THEN:
+                return isGreaterThanOrEqual(targetValue,value)
+            case Operator.CONTAINS:
+                return false;
+            case Operator.STARTS_WITH:
+            return String(targetValue).startsWith(String(value));
+            case Operator.DIFFERENT:
                 return !isEqual(targetValue, value);
             default:
                 throw new Error(`Invalid operator: ${operator}`);
