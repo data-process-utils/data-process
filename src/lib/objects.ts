@@ -171,5 +171,6 @@ export {
     isNumber,
     isString,
     getPropertyNames,
-    getValuesInArray
+    getValuesInArray,
+    containsArray
 }
