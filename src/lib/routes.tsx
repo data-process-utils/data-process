@@ -1,6 +1,6 @@
 import {ReactElement} from "react";
 import {Code} from "react-feather";
-import {TranslationKeys} from "@/i18n/locales/tranlation.ts";
+import {TranslationKeys} from "../../../src/i18n/locales/tranlation.ts";
 
 type RouteInfo = {
     title: TranslationKeys | string;
