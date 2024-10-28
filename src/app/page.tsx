@@ -11,16 +11,16 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {useEffect, useRef, useState} from "react";
 import {SearchEngineFactory} from "@/lib/search-engine";
 import {SearchParams} from "@/types/search-engine";
-import {getKeys, getPropertyNames} from "@/lib/objects";
+import {getPropertyNames} from "@/lib/objects";
 import {Panel} from "@/components/ui/panel";
-import {Fieldset, Flex, HStack, Input, Progress, Select, Separator} from "@chakra-ui/react";
+import {createListCollection, Fieldset, Flex, HStack, Input, Separator, Stack} from "@chakra-ui/react";
 import {FileInput, FileUploadClearTrigger, FileUploadLabel, FileUploadRoot} from "@/components/ui/file-button";
 import {ProgressBar, ProgressRoot, ProgressValueText} from "@/components/ui/progress";
-import {Field} from "@/components/ui/field";
 import {Button} from "@/components/ui/button";
 import {InputGroup} from "@/components/ui/input-group";
 import {LuFileUp} from "react-icons/lu";
 import {CloseButton} from "@/components/ui/close-button";
+import {SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValueText} from "@/components/ui/select";
 // import Head from "next/head";
 
 
@@ -74,6 +74,7 @@ const operatorTranslator: OperatorTranslator[] = [
     {labelKey: "greater_than_or_equal_label", operator: Operator.GREATER_THAN_OR_EQUAL},
 
 ]
+
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -209,6 +210,20 @@ export default function Home() {
         }
     }, [control]);
 
+
+    const createItens = () => {
+        const items = getPropertyNames(fileData).map(data => {
+            return {
+                label: data.propertyName == data.property ? data.property : `${data.property} (${data.propertyName})`,
+                value: data.property
+            }
+        })
+
+        return createListCollection({
+            items: items
+        })
+    }
+
     function createItem() {
         append({fieldPath: "", operator: Operator.EQUAL, value: "", negate: false});
     }
@@ -256,10 +271,51 @@ export default function Home() {
 
 
                         <Separator/>
+                        <Fieldset.Root size="lg" maxW="md">
+                            <Stack>
+                                <Fieldset.Legend>{translate('fields_to_filter_label')}</Fieldset.Legend>
+                            </Stack>
+                            <Fieldset.Content>
+                                <Flex direction="column" className="gap-5">
+                                    {fields.map((_, i) => (
+                                        <Flex flex={1} gap={20} w="100%" key={i} ref={i === 0 ? firstErrorRef : null}
+                                              align="end">
+                                            <Controller
+                                                render={({field}) => (
+                                                    !(fileUploaded && fileData) ? <Input/> :
+                                                        <SelectRoot appearance="light"
+                                                            name={field.name}
+                                                            value={field.value as never}
+                                                            onValueChange={({value}) => field.onChange(value)}
+                                                            onInteractOutside={() => field.onBlur()}
+                                                            collection={createItens()}>
+                                                            <SelectTrigger>
+                                                                <SelectValueText
+                                                                    placeholder={translate('operator_label')}/>
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {createItens().items.map(value => (
+                                                                    <SelectItem key={value.value} item={value.value}>
+                                                                        {value.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </SelectRoot>
+
+
+                                                )}
+                                                control={control} name={`items.${i}.fieldPath`}/>
+
+                                        </Flex>
+                                    ))}
+                                </Flex>
+
+                            </Fieldset.Content>
+                        </Fieldset.Root>
                         <Button
                             // radius="xl"
                             variant="outline"
-                            color="red"
+                            color="purple"
                             type="button"
                             onClick={() => createItem()}
                             className="mt-4 self-end"

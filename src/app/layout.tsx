@@ -6,7 +6,6 @@ import {MainLayout} from "@/layouts/main";
 import {Provider} from "@/components/ui/provider";
 import {TranslationProvider} from "@/contexts/language-context-provider";
 import {Theme} from "@chakra-ui/react";
-// import {TranslationProvider} from "@/contexts/language-context-provider";
 
 export const metadata: Metadata = {
     title: "Json Finder",
@@ -24,7 +23,7 @@ export default function RootLayout({
         <html lang="pt-BR" suppressHydrationWarning>
         <body>
         <Provider>
-            <Theme appearance="light">
+            <Theme hasBackground={false} appearance="light">
                 <TranslationProvider>
 
 
