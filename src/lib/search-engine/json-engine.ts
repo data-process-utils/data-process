@@ -1,24 +1,18 @@
-import {AbstractSearchEngine, SearchParams} from "@/types/search-engine.ts";
-import {isArray} from "@/lib/objects.ts";
+import {AbstractSearchEngine, SearchParams} from "@/types/search-engine";
+import {isArray} from "@/lib/objects";
 
 
 export class JsonSearchEngine<T> extends AbstractSearchEngine<T> {
 
-    search(params: SearchParams[], target: T[] | T): Promise<T> | Promise<T[]> {
-        let promise: Promise<T> | Promise<T[]>
+
+    search(params: SearchParams[], target: T[] | T): T[] | T {
         if (!isArray(target)) {
-            promise = new Promise<T>((resolve) => {
-                if (this.isAllMatch(params, target)) {
-                    resolve(target);
-                }
-                resolve({} as T)
-            })
-        } else {
-            promise = new Promise<T[]>((resolve) => {
-                resolve(target.map((item) =>  this.search(params, item).then( x => x)) as T[])
-            })
+            if (this.isAllMatch(params, target)) {
+                return target;
+            }
+            return {} as T
         }
-        return promise
+        return target.filter((item) => this.search(params, item)) as T[]
     }
 
 }

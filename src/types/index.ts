@@ -1,3 +1,3 @@
-import * as filterData from "./filter-data.ts"
+import * as filterData from "./filter-data"
 
 export {filterData}

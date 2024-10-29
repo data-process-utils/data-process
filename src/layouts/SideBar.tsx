@@ -1,25 +1,31 @@
-import {Link, useLocation} from "react-router-dom";
-import {routes} from "@/lib/routes.tsx";
-import {useTranslator} from "@/hooks/use-translator.ts";
+'use client'
+import {routes} from "@/lib/routes";
+import Link from "next/link";
+import {useTranslator} from "@/hooks/use-translator";
+
 
 export function SideBar() {
 
-    const location = useLocation()
+
+    if (typeof window !== "undefined") {
+        console.log();
+    }
 
     const {translate} = useTranslator()
 
 
     const makeLinks = () => {
+        // {}
 
         const keys: string[] = Object.keys(routes)
         return keys.map((route) => (
             <li key={route}
-                className={`${String(location.pathname).toLowerCase() == route ? 'bg-purple-600' : 'bg-purple-500'} 
+                className={`${typeof window !== "undefined" && window.location.pathname === route ? 'bg-purple-600' : 'bg-purple-500'} } 
                      transition-colors ease-in-out cursor-pointer
                      py-3 px-3 mt-3 my-1 rounded-lg hover:bg-purple-700 w-full
                      text-white
                      active:bg-purple-500`}>
-                <Link to={route} className="flex w-full justify-between">
+                <Link href={route} className="flex w-full justify-between">
                     {translate(routes[route].title)} {routes[route].icon}
                 </Link>
             </li>
@@ -30,6 +36,7 @@ export function SideBar() {
         <nav className="flex flex-col w-full ">
             <ul className="flex flex-col w-full justify-center ">
                 {
+
                     makeLinks()
                 }
             </ul>

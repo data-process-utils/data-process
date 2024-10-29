@@ -1,3 +1,4 @@
+'use client';
 import {useEffect, useState} from "react";
 
 export function useTitle(initialTitle?: string) {
@@ -8,7 +9,9 @@ export function useTitle(initialTitle?: string) {
     }
 
     useEffect(() => {
-        document.title = title;
+        // if (typeof window !== "undefined") {
+            document.title = title;
+        // }
     }, [title]);
 
     return [updateTitle]

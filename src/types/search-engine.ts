@@ -1,6 +1,6 @@
-import {Operator} from "@/types/filter-data.ts";
-import {isEqual, isGreaterThanOrEqual} from "@/lib/values.ts";
-import {containsArray, getValueInPath, getValuesInArray, isArray} from "@/lib/objects.ts";
+import {Operator} from "@/types/filter-data";
+import {isEqual, isGreaterThanOrEqual} from "@/lib/values";
+import {containsArray, getValueInPath, getValuesInArray, isArray} from "@/lib/objects";
 
 export type SearchParams = {
     field: string,
@@ -9,15 +9,20 @@ export type SearchParams = {
 }
 
 
+export type DataFilterRequest= {
+    params: SearchParams[],
+    targetData: unknown | unknown[]
+}
+
 export interface SearchEngine<T> {
-    search(params: SearchParams[], target: T | T[]): Promise<T> | Promise<T[]>;
+    search(params: SearchParams[], target: T | T[]):T | T[];
 
 }
 
 
 export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
 
-    abstract search(params: SearchParams[], target: T | T[]): Promise<T> | Promise<T[]>;
+    abstract search(params: SearchParams[], target: T | T[]):T | T[];
 
 
     protected isMatch(searchParams: SearchParams, target: T | T[]): boolean {
@@ -60,11 +65,11 @@ export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
             case Operator.EQUAL:
                 return isEqual(targetValue, value);
             case Operator.LESS_THEN:
-                return isGreaterThanOrEqual(targetValue,value)
+                return isGreaterThanOrEqual(targetValue, value)
             case Operator.CONTAINS:
                 return false;
             case Operator.STARTS_WITH:
-            return String(targetValue).startsWith(String(value));
+                return String(targetValue).startsWith(String(value));
             case Operator.DIFFERENT:
                 return !isEqual(targetValue, value);
             default:

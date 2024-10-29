@@ -1,31 +1,42 @@
-import {useTranslation} from "react-i18next";
-import {ActionIcon, Flex, Tooltip} from "@mantine/core";
-import locales from "@/i18n/locales";
-import {Flag} from "@/components/i18n/flag.tsx";
+'use client';
+
+import {Flag} from "@/components/i18n/flag";
 import {useEffect, useRef, useState} from "react";
 import {Globe} from "react-feather";
-import {useTranslator} from "@/hooks/use-translator.ts";
+import {useTranslation} from "@/contexts/language-context-provider";
+import {useTranslator} from "@/hooks/use-translator";
+import {Tooltip} from "@/components/ui/tooltip";
+import {Flex} from "@chakra-ui/react";
+import {Button} from "@/components/ui/button";
 
 
 type LanguageSelectorProps = {
     className?: string
 }
 
+const locales = [
+    "pt-BR", "en-US"
+]
+
+
 const languageColor = {
-    "en-US": "blue",
-    "pt-BR": "green"
+    "en-US": "blue.500",
+    "pt-BR": "green.500"
 }
 
+
 export function LanguageSelector(props: LanguageSelectorProps) {
-    const {i18n} = useTranslation()
+    const {setLocale} = useTranslation()
     const {translate} = useTranslator()
+    const [selectedLanguage, setSelectedLanguage] = useState('pt-BR')
 
     const ref = useRef<HTMLDivElement>(null);
 
     const [hiddenLanguage, setHidden] = useState(true)
 
     async function handleChangeLanguage(language: string) {
-        await i18n.changeLanguage(language)
+        setLocale(language)
+        setSelectedLanguage(language)
         setHidden(true)
     }
 
@@ -43,17 +54,16 @@ export function LanguageSelector(props: LanguageSelectorProps) {
         };
     }, []);
 
-    const selectedLanguage = i18n.language
 
     return <Flex ref={ref} {...props}>
-        {hiddenLanguage ? <Tooltip label={translate('select_lang')}>
-                <ActionIcon onClick={() => setHidden(prev => !prev)} size="lg"
-                            color={languageColor[selectedLanguage as 'pt-BR' | 'en-US']}>
+        {hiddenLanguage ? <Tooltip content={translate('select_lang')}>
+                <Button onClick={() => setHidden(prev => !prev)} size="sm" color="white"
+                        bg={languageColor[selectedLanguage as 'pt-BR' | 'en-US']}>
                     <Globe/>
-                </ActionIcon>
+                </Button>
             </Tooltip>
-            : Object.keys(locales).map((v, i) => {
-                return <Flag image={`${String(v).toLowerCase()}.png`} isSelected={selectedLanguage == v}
+            : locales.map((v, i) => {
+                return <Flag image={`/${String(v).toLowerCase()}.png`} isSelected={selectedLanguage == v}
                              onClick={() => handleChangeLanguage(v)} key={i}/>
             })
         }
