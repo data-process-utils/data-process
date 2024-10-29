@@ -1,4 +1,4 @@
-import {DataFilterRequest, SearchParams} from "@/types/search-engine";
+import {DataFilterRequest} from "@/types/search-engine";
 import {SearchEngineFactory} from "@/lib/search-engine";
 
 

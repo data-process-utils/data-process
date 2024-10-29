@@ -1,5 +1,5 @@
-import {JsonSearchEngine} from "@/lib/search-engine/json-engine.ts";
-import {SearchEngine} from "@/types/search-engine.ts";
+import {JsonSearchEngine} from "@/lib/search-engine/json-engine";
+import {SearchEngine} from "@/types/search-engine";
 
 type SearchMode = "JSON" | "CSV" | "XML" | "XLS"
 
