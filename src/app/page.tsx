@@ -21,6 +21,7 @@ import {LuFileUp} from "react-icons/lu";
 import {CloseButton} from "@/components/ui/close-button";
 import {SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValueText} from "@/components/ui/select";
 import {Field} from "@/components/ui/field";
+import {Checkbox} from "@/components/ui/checkbox";
 // import Head from "next/head";
 
 
@@ -98,7 +99,6 @@ export default function Home() {
 
     const {control, handleSubmit, watch, formState: {errors, isSubmitting}} = form;
     const [uploadProgress, setUploadProgress] = useState<number>(0);
-    const fileInputRef = useRef<HTMLButtonElement>(null);
     const firstErrorRef = useRef<HTMLDivElement | null>(null);
     const {fields, append, remove} = useFieldArray({
         control,
@@ -270,11 +270,24 @@ export default function Home() {
     }, [control]);
 
 
-    const createItens = () => {
+    const createItems = () => {
         const items = getPropertyNames(fileData).map(data => {
             return {
                 label: data.propertyName == data.property ? data.property : `${data.property} (${data.propertyName})`,
                 value: data.property
+            }
+        })
+
+        return createListCollection({
+            items: items
+        })
+    }
+
+    const createOperators = () => {
+        const items = operatorTranslator.map(op => {
+            return {
+                label: translate(op.labelKey),
+                value: op.operator
             }
         })
 
@@ -322,30 +335,41 @@ export default function Home() {
                                         <ProgressBar flex="1"/>
                                         <ProgressValueText>{`${uploadProgress.toFixed(2)}%`}</ProgressValueText>
                                     </HStack>
-
                                 </ProgressRoot>
-                                // <ProgressBar w="100%" value={uploadProgress} radius="xl" animated/>
                             )}
                         </Flex>
 
 
                         <Separator/>
-                        <Fieldset.Root size="lg" maxW="md">
-                            <Stack>
+                        <Fieldset.Root size="lg" w={"full"}>
+                            <Stack className="px-8">
                                 <Fieldset.Legend>{translate('fields_to_filter_label')}</Fieldset.Legend>
                             </Stack>
                             <Fieldset.Content>
-                                <Flex direction="column" className="gap-5">
+                                <Flex direction="column" className="gap-5 px-6" w={"full"}>
                                     {fields.map((_, i) => (
                                         <Flex flex={1} gap={20} w="100%" key={i} ref={i === 0 ? firstErrorRef : null}
                                               align="end">
                                             <Controller
                                                 render={({field}) => (
-                                                    !(fileUploaded && fileData) ? <Input/> :
+                                                    !(fileUploaded && fileData) ?
+                                                        <Field required
+                                                               w={"full"}
+                                                               invalid={!!errors.items?.[i]?.fieldPath?.message}
+                                                               errorText={errors.items?.[i]?.fieldPath?.message && translate(errors.items?.[i]?.fieldPath?.message)}
+                                                               label={translate('operator_label')}
+                                                               className={`${getStyleItem(i)}`}
+                                                        >
+                                                            <Input  {...field}/>
+                                                        </Field>
+                                                        :
                                                         <Field required
                                                                invalid={!!errors.items?.[i]?.fieldPath?.message}
                                                                errorText={errors.items?.[i]?.fieldPath?.message && translate(errors.items?.[i]?.fieldPath?.message)}
-                                                               label={translate('operator_label')}>
+                                                               label={translate('operator_label')}
+                                                               w={"full"}
+                                                               className={`${getStyleItem(i)}`}
+                                                        >
                                                             <SelectRoot
                                                                 name={field.name}
                                                                 value={[field.value]}
@@ -360,12 +384,12 @@ export default function Home() {
 
                                                                 }}
                                                                 onInteractOutside={() => field.onBlur()}
-                                                                collection={createItens()}>
+                                                                collection={createItems()}>
                                                                 <SelectTrigger>
                                                                     <SelectValueText/>
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    {createItens().items.map(value => (
+                                                                    {createItems().items.map(value => (
                                                                         <SelectItem key={value.value}
                                                                                     item={value.value}>
                                                                             {value.label}
@@ -376,6 +400,71 @@ export default function Home() {
                                                         </Field>
                                                 )}
                                                 control={control} name={`items.${i}.fieldPath`}/>
+
+                                            <Controller
+                                                render={({field}) => (
+                                                    <Field required
+                                                           invalid={!!errors.items?.[i]?.operator?.message}
+                                                           errorText={errors.items?.[i]?.operator?.message && translate(errors.items?.[i]?.operator?.message)}
+                                                           label={translate('operator_label')}
+                                                           w={"full"}
+                                                           className={`${getStyleItem(i)}`}>
+                                                        <SelectRoot
+                                                            name={field.name}
+                                                            value={[field.value]}
+                                                            onValueChange={({value}) => {
+                                                                field.onChange(value[0])
+                                                            }}
+                                                            onInteractOutside={() => field.onBlur()}
+                                                            collection={createOperators()}>
+                                                            <SelectTrigger>
+                                                                <SelectValueText/>
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {createOperators().items.map(value => (
+                                                                    <SelectItem key={value.value}
+                                                                                item={value.value}>
+                                                                        {value.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </SelectRoot>
+                                                    </Field>)
+                                                } name={`items.${i}.operator`} control={control}/>
+
+                                            <Controller render={
+                                                ({field}) => (
+                                                    <Field
+                                                        w={"30px"}
+                                                        invalid={!!errors.items?.[i]?.negate?.message}
+                                                        errorText={errors.items?.[i]?.negate?.message && translate(errors.items?.[i]?.negate?.message)}
+                                                        label={translate('negate_label')}
+                                                        className={`${getStyleItem(i)} h-full`}>
+                                                        <Checkbox checked={field.value}
+                                                                  colorPalette={"purple"}
+                                                                  onCheckedChange={e => field.onChange(e.checked)}/>
+                                                    </Field>
+                                                )}
+                                                        control={control} name={`items.${i}.negate`}/>
+                                            <Controller render={({field}) => (
+                                                <Field required label={translate('value_label')}
+                                                       w={"full"}
+                                                       className={`${getStyleItem(i)}`}
+                                                       invalid={!!errors.items?.[i]?.value?.message}
+                                                       errorText={errors.items?.[i]?.value?.message && translate(errors.items?.[i]?.value?.message)}>
+                                                    <Input   {...field} />
+                                                </Field>
+                                            )} control={control} name={`items.${i}.value`}/>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                colorPalette={"purple"}
+                                                onClick={() => remove(i)}
+                                                className={`"mt-2" ${getStyleItem(i)}`}
+                                                disabled={items.length <= 1}
+                                            >
+                                                {translate('remove_label')}
+                                            </Button>
                                         </Flex>
                                     ))}
                                 </Flex>
@@ -383,7 +472,6 @@ export default function Home() {
                             </Fieldset.Content>
                         </Fieldset.Root>
                         <Button
-                            // radius="xl"
                             variant="outline"
                             color="purple"
                             type="button"
@@ -397,12 +485,9 @@ export default function Home() {
                 </Panel>
                 <Button
                     loading={isSubmitting}
-                    // loaderProps={{type: 'dots'}}
-                    // radius="xl"
                     colorPalette="purple" variant="solid"
                     size="md"
                     className="my-5 self-end"
-                    // variant="filled"
                     type="submit">{translate('process_label')}</Button>
 
             </form>
