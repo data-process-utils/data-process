@@ -1,5 +1,4 @@
 import {ReactNode} from "react";
-import {cn} from "@/lib/utils";
 
 type PanelProps = {
     title: string;
@@ -8,7 +7,8 @@ type PanelProps = {
 }
 
 export function Panel({title, children, className}: PanelProps) {
-    return <fieldset className={cn('border border-solid border-gray-300 py-0 px-2 pb-2 rounded w-full flex flex-1', className)}>
+    return <fieldset
+        className={`border border-solid border-gray-300 py-0 px-2 pb-2 rounded w-full flex flex-1 ${className}`}>
         <legend className="text-lg font-medium max-w-full relative m-auto px-7">{title}</legend>
         {children}
     </fieldset>
