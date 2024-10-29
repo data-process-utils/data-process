@@ -1,7 +1,7 @@
 'use client';
 
 import {TranslateParams, useTranslation} from "@/contexts/language-context-provider";
-import {TranslationKeys} from "@/i18n/locales/tranlation";
+import {TranslationKeys} from "@/i18n/tranlation";
 
 
 export function useTranslator() {
