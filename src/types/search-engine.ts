@@ -9,15 +9,20 @@ export type SearchParams = {
 }
 
 
+export type DataFilterRequest= {
+    params: SearchParams[],
+    targetData: unknown | unknown[]
+}
+
 export interface SearchEngine<T> {
-    search(params: SearchParams[], target: T | T[]): Promise<T> | Promise<T[]>;
+    search(params: SearchParams[], target: T | T[]):T | T[];
 
 }
 
 
 export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
 
-    abstract search(params: SearchParams[], target: T | T[]): Promise<T> | Promise<T[]>;
+    abstract search(params: SearchParams[], target: T | T[]):T | T[];
 
 
     protected isMatch(searchParams: SearchParams, target: T | T[]): boolean {

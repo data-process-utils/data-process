@@ -9,8 +9,7 @@ import {z} from "zod";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useEffect, useRef, useState} from "react";
-import {SearchEngineFactory} from "@/lib/search-engine";
-import {SearchParams} from "@/types/search-engine";
+import {DataFilterRequest, SearchParams} from "@/types/search-engine";
 import {getPropertyNames} from "@/lib/objects";
 import {Panel} from "@/components/ui/panel";
 import {createListCollection, Fieldset, Flex, HStack, Input, Separator, Stack} from "@chakra-ui/react";
@@ -21,6 +20,7 @@ import {InputGroup} from "@/components/ui/input-group";
 import {LuFileUp} from "react-icons/lu";
 import {CloseButton} from "@/components/ui/close-button";
 import {SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValueText} from "@/components/ui/select";
+import {Field} from "@/components/ui/field";
 // import Head from "next/head";
 
 
@@ -112,22 +112,81 @@ export default function Home() {
     const fileUploaded = watch('jsonFile')
 
     const onSubmit = async (data: FormData) => {
+        console.log(data)
+        const requestData: DataFilterRequest = {
+            targetData: fileData,
+            params: createParams(data),
+        }
 
-        const result = await SearchEngineFactory.createSearchEngine('JSON').search(createParams(data), fileData)
+        const result = await fetch('/json-filter', {
+            method: 'POST',
+            body: JSON.stringify(requestData),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(async r => {
 
-        const fileResult: string
-            = JSON.stringify(result, null, 4)
+            const response = r.body
 
-        const blob = new Blob([fileResult], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'result.json';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+            if (response) {
+                console.log(response)
+                const decoder = new TextDecoder()
+                const result = decoder.decode(await readStreamData(response))
+                console.log(result)
+                return JSON.parse(result)
+            }
+            return null
+        })
+        if (data) {
+
+            console.log(result)
+
+
+            const fileResult: string
+                = JSON.stringify(result, null, 4)
+
+            const blob = new Blob([fileResult], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `result-.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
     };
+
+
+    async function readStreamData(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+        const reader = stream.getReader();
+        const chunks: Uint8Array[] = [];
+
+        try {
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+
+                if (value) {
+                    chunks.push(value);
+                }
+            }
+        } finally {
+            reader.releaseLock();
+        }
+
+        // Concatenate all Uint8Array chunks into a single Uint8Array
+        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const result = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+            result.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        return result;
+    }
+
 
     function createParams(param: FormData) {
         return param.items.map(item => {
@@ -283,29 +342,40 @@ export default function Home() {
                                             <Controller
                                                 render={({field}) => (
                                                     !(fileUploaded && fileData) ? <Input/> :
-                                                        <SelectRoot appearance="light"
-                                                            name={field.name}
-                                                            value={field.value as never}
-                                                            onValueChange={({value}) => field.onChange(value)}
-                                                            onInteractOutside={() => field.onBlur()}
-                                                            collection={createItens()}>
-                                                            <SelectTrigger>
-                                                                <SelectValueText
-                                                                    placeholder={translate('operator_label')}/>
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {createItens().items.map(value => (
-                                                                    <SelectItem key={value.value} item={value.value}>
-                                                                        {value.label}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </SelectRoot>
+                                                        <Field required
+                                                               invalid={!!errors.items?.[i]?.fieldPath?.message}
+                                                               errorText={errors.items?.[i]?.fieldPath?.message && translate(errors.items?.[i]?.fieldPath?.message)}
+                                                               label={translate('operator_label')}>
+                                                            <SelectRoot
+                                                                name={field.name}
+                                                                value={[field.value]}
+                                                                onValueChange={({value}) => {
+                                                                    console.log(value[0])
+                                                                    if (value[0]) {
+                                                                        field.onChange(value[0])
+                                                                    } else {
+                                                                        field.onChange('')
+                                                                    }
 
 
+                                                                }}
+                                                                onInteractOutside={() => field.onBlur()}
+                                                                collection={createItens()}>
+                                                                <SelectTrigger>
+                                                                    <SelectValueText/>
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {createItens().items.map(value => (
+                                                                        <SelectItem key={value.value}
+                                                                                    item={value.value}>
+                                                                            {value.label}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </SelectRoot>
+                                                        </Field>
                                                 )}
                                                 control={control} name={`items.${i}.fieldPath`}/>
-
                                         </Flex>
                                     ))}
                                 </Flex>
@@ -326,7 +396,7 @@ export default function Home() {
 
                 </Panel>
                 <Button
-                    // loading={isSubmitting}
+                    loading={isSubmitting}
                     // loaderProps={{type: 'dots'}}
                     // radius="xl"
                     colorPalette="purple" variant="solid"
