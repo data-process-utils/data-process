@@ -1,5 +1,5 @@
 import {ReactNode} from "react";
-import {cn} from "@/lib/utils.tsx";
+import {cn} from "@/lib/utils";
 
 type PanelProps = {
     title: string;

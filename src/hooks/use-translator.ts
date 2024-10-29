@@ -1,10 +1,7 @@
-import {useTranslation} from "react-i18next";
-import {TranslationKeys} from "@/i18n/locales/tranlation.ts";
+'use client';
 
-
-type TranslateParams = {
-    [key: string]: string | number | undefined; // pode incluir strings, números ou undefined
-};
+import {TranslateParams, useTranslation} from "@/contexts/language-context-provider";
+import {TranslationKeys} from "@/i18n/locales/tranlation";
 
 
 export function useTranslator() {

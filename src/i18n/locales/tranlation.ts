@@ -1,3 +1,4 @@
+'use client';
 const filter_json_title = "filter_json_title"
 const filter_json_description = "filter_json_description"
 const details_title = "details_title";
