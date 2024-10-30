@@ -1,0 +1,5 @@
+# Ignorar um arquivo específico
+scripts/generateBuildInfo.js
+
+# Ignorar uma pasta
+build/

@@ -4,10 +4,11 @@
   "homepage": "https://joaoh4547.github.io/json-finder/",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "npm run prebuild && next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prebuild": "node scripts/generateBuildInfo.js"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.0.1",
