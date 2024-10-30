@@ -2,6 +2,7 @@
 import {routes} from "@/lib/routes";
 import Link from "next/link";
 import {useTranslator} from "@/hooks/use-translator";
+import {BuildNumber} from "@/components/build/build-number";
 
 
 export function SideBar() {
@@ -34,12 +35,13 @@ export function SideBar() {
 
     return <aside className="w-full mx-1">
         <nav className="flex flex-col w-full ">
-            <ul className="flex flex-col w-full justify-center ">
+            <ul className="flex flex-col w-full items-center h-[89vh] max-h-[89vh] overflow-y-auto">
                 {
 
                     makeLinks()
                 }
             </ul>
+            <BuildNumber/>
         </nav>
     </aside>
 }

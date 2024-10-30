@@ -4,7 +4,7 @@
 import {useTranslator} from "@/hooks/use-translator";
 import {generateFileSize, Unit} from "@/lib/unit";
 import {Operator} from "@/types/filter-data";
-import {messages, TranslationKeys} from "@/i18n/locales/tranlation";
+import {messages, TranslationKeys} from "@/i18n/tranlation";
 import {z} from "zod";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
