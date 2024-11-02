@@ -13,25 +13,25 @@ export type SearchParams = {
 
 export type DataFilterRequest = {
     params: SearchParams[],
-    file: File,
+    fileContent: ArrayBuffer,
     filetype: FileType
 }
 
 export interface SearchEngine<T> {
-    search(params: SearchParams[], file: File): T | T[];
+    search(params: SearchParams[], file: string): Promise<T | T[]>;
 }
 
 
 export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
 
-    abstract search(params: SearchParams[], file: File): T | T[];
+    abstract search(params: SearchParams[], file: string): Promise<T | T[]>;
 
 
-    private read(file: File) {
+    protected read(file: File) {
         return read(file, 'arrayBuffer')
     }
 
-    private decode(buffer: ArrayBuffer) {
+    protected decode(buffer: ArrayBuffer) {
         return new TextDecoder().decode(buffer);
     }
 

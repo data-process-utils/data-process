@@ -1,10 +1,9 @@
 {
   "name": "file-coomns",
   "version": "1.4.0",
-  "homepage": "https://joaoh4547.github.io/json-finder/",
   "private": true,
   "scripts": {
-    "dev": "npm run prebuild && next dev --turbopack",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
