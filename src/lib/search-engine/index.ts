@@ -1,16 +1,16 @@
 import {JsonSearchEngine} from "@/lib/search-engine/json-engine";
 import {SearchEngine} from "@/types/search-engine";
+import {FileType} from "@/types/files";
 
-type SearchMode = "JSON" | "CSV" | "XML" | "XLS"
 
 
 export class SearchEngineFactory {
-    static createSearchEngine<T>(mode: SearchMode): SearchEngine<T> {
-        switch (mode) {
+    static createSearchEngine<T>(type: FileType): SearchEngine<T> {
+        switch (type) {
             case "JSON":
                 return new JsonSearchEngine<T>();
             default:
-                throw new Error(`Unsupported search mode: ${mode}`);
+                throw new Error(`Unsupported search of type: ${type}`);
         }
     }
 }

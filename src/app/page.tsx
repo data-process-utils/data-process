@@ -200,58 +200,58 @@ export default function Home() {
 
     const handleFileChange = (file: File | null) => {
         if (file) {
-            console.log(file.size);
-            console.log(maxFileSize);
+            // console.log(file.size);
+            // console.log(maxFileSize);
 
             if (file.size > maxFileSize) return;
 
             form.setValue("jsonFile", file);
 
-            const chunkSize = 1024 * 1024; // 1 MB
-            let offset = 0;
-            const reader = new FileReader();
-            let jsonTextBuffer = ""; // Buffer para acumular o JSON
+            // const chunkSize = 1024 * 1024; // 1 MB
+            // let offset = 0;
+            // const reader = new FileReader();
+            // let jsonTextBuffer = ""; // Buffer para acumular o JSON
 
-            const updateProgress = (loadedBytes: number, totalBytes: number) => {
-                const percentComplete = Math.min((loadedBytes / totalBytes) * 100, 100);
-                setUploadProgress(percentComplete);
-            };
+            // const updateProgress = (loadedBytes: number, totalBytes: number) => {
+            //     const percentComplete = Math.min((loadedBytes / totalBytes) * 100, 100);
+            //     setUploadProgress(percentComplete);
+            // };
 
-            reader.onload = (event) => {
-                const textChunk = event.target?.result as string;
-                if (textChunk) {
-                    jsonTextBuffer += textChunk; // Adiciona o chunk ao buffer
-                }
+            // reader.onload = (event) => {
+            //     const textChunk = event.target?.result as string;
+            //     if (textChunk) {
+            //         jsonTextBuffer += textChunk; // Adiciona o chunk ao buffer
+            //     }
+            //
+            //     offset += chunkSize;
+            //     updateProgress(offset, file.size);
+            //
+            //     if (offset < file.size) {
+            //         readNextChunk();
+            //     } else {
+            //         finalizeProcessing();
+            //     }
+            // };
 
-                offset += chunkSize;
-                updateProgress(offset, file.size);
+            // const readNextChunk = () => {
+            //     const chunk = file.slice(offset, offset + chunkSize);
+            //     reader.readAsText(chunk);
+            // };
 
-                if (offset < file.size) {
-                    readNextChunk();
-                } else {
-                    finalizeProcessing();
-                }
-            };
+            // const finalizeProcessing = () => {
+            //     try {
+            //         console.log(jsonTextBuffer);
+            //         const parsedData = JSON.parse(jsonTextBuffer); // Faz o parse após juntar o JSON completo
+            //         setFileData(parsedData);
+            //         console.log(parsedData);
+            //     } catch (error) {
+            //         console.error("Erro ao fazer o parse do JSON:", error);
+            //     } finally {
+            //         setTimeout(() => setUploadProgress(0), 1000);
+            //     }
+            // };
 
-            const readNextChunk = () => {
-                const chunk = file.slice(offset, offset + chunkSize);
-                reader.readAsText(chunk);
-            };
-
-            const finalizeProcessing = () => {
-                try {
-                    console.log(jsonTextBuffer);
-                    const parsedData = JSON.parse(jsonTextBuffer); // Faz o parse após juntar o JSON completo
-                    setFileData(parsedData);
-                    console.log(parsedData);
-                } catch (error) {
-                    console.error("Erro ao fazer o parse do JSON:", error);
-                } finally {
-                    setTimeout(() => setUploadProgress(0), 1000);
-                }
-            };
-
-            readNextChunk(); // Inicia a leitura do primeiro chunk
+            // readNextChunk(); // Inicia a leitura do primeiro chunk
         }
     };
 
