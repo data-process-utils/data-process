@@ -8,13 +8,11 @@ import {messages, TranslationKeys} from "@/i18n/tranlation";
 import {z} from "zod";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {useEffect, useRef, useState} from "react";
-import {DataFilterRequest, SearchParams} from "@/types/search-engine";
-import {getPropertyNames} from "@/lib/objects";
+import {useEffect, useRef} from "react";
+import {DataFilterRequest, SearchParams} from "@/lib/search-engine/search-engine";
 import {Panel} from "@/components/ui/panel";
-import {createListCollection, Fieldset, Flex, HStack, Input, Separator, Stack} from "@chakra-ui/react";
+import {createListCollection, Fieldset, Flex, Input, Separator, Stack} from "@chakra-ui/react";
 import {FileInput, FileUploadClearTrigger, FileUploadLabel, FileUploadRoot} from "@/components/ui/file-button";
-import {ProgressBar, ProgressRoot, ProgressValueText} from "@/components/ui/progress";
 import {Button} from "@/components/ui/button";
 import {InputGroup} from "@/components/ui/input-group";
 import {LuFileUp} from "react-icons/lu";
@@ -22,6 +20,7 @@ import {CloseButton} from "@/components/ui/close-button";
 import {SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValueText} from "@/components/ui/select";
 import {Field} from "@/components/ui/field";
 import {Checkbox} from "@/components/ui/checkbox";
+import {getType} from "@/types/files";
 // import Head from "next/head";
 
 
@@ -98,23 +97,27 @@ export default function Home() {
     });
 
     const {control, handleSubmit, watch, formState: {errors, isSubmitting}} = form;
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
+    // const [uploadProgress, setUploadProgress] = useState<number>(0);
     const firstErrorRef = useRef<HTMLDivElement | null>(null);
     const {fields, append, remove} = useFieldArray({
         control,
         name: "items", // Nome do campo do array
     });
 
-    const [fileData, setFileData] = useState<unknown>()
+    // const [fileData, setFileData] = useState<unknown>()
 
     const items = watch("items");
 
-    const fileUploaded = watch('jsonFile')
+    // const fileUploaded = watch('jsonFile')
 
     const onSubmit = async (data: FormData) => {
         console.log(data)
+        const file = data.jsonFile as File
+        const fileType = getType(file)
+
         const requestData: DataFilterRequest = {
-            targetData: fileData,
+            file: file,
+            filetype: fileType,
             params: createParams(data),
         }
 
@@ -125,9 +128,7 @@ export default function Home() {
                 'Content-Type': 'application/json'
             }
         }).then(async r => {
-
             const response = r.body
-
             if (response) {
                 console.log(response)
                 const decoder = new TextDecoder()
@@ -270,18 +271,18 @@ export default function Home() {
     }, [control]);
 
 
-    const createItems = () => {
-        const items = getPropertyNames(fileData).map(data => {
-            return {
-                label: data.propertyName == data.property ? data.property : `${data.property} (${data.propertyName})`,
-                value: data.property
-            }
-        })
-
-        return createListCollection({
-            items: items
-        })
-    }
+    // const createItems = () => {
+    //     const items = getPropertyNames(fileData).map(data => {
+    //         return {
+    //             label: data.propertyName == data.property ? data.property : `${data.property} (${data.propertyName})`,
+    //             value: data.property
+    //         }
+    //     })
+    //
+    //     return createListCollection({
+    //         items: items
+    //     })
+    // }
 
     const createOperators = () => {
         const items = operatorTranslator.map(op => {
@@ -329,14 +330,14 @@ export default function Home() {
                                     </InputGroup>
                                 </FileUploadRoot>
                             } name="jsonFile" control={control}/>
-                            {uploadProgress > 0 && (
-                                <ProgressRoot value={uploadProgress} w="full" striped animated>
-                                    <HStack gap="5">
-                                        <ProgressBar flex="1"/>
-                                        <ProgressValueText>{`${uploadProgress.toFixed(2)}%`}</ProgressValueText>
-                                    </HStack>
-                                </ProgressRoot>
-                            )}
+                            {/*{uploadProgress > 0 && (*/}
+                            {/*    <ProgressRoot value={uploadProgress} w="full" striped animated>*/}
+                            {/*        <HStack gap="5">*/}
+                            {/*            <ProgressBar flex="1"/>*/}
+                            {/*            <ProgressValueText>{`${uploadProgress.toFixed(2)}%`}</ProgressValueText>*/}
+                            {/*        </HStack>*/}
+                            {/*    </ProgressRoot>*/}
+                            {/*)}*/}
                         </Flex>
 
 
@@ -352,52 +353,52 @@ export default function Home() {
                                               align="end">
                                             <Controller
                                                 render={({field}) => (
-                                                    !(fileUploaded && fileData) ?
-                                                        <Field required
-                                                               w={"full"}
-                                                               invalid={!!errors.items?.[i]?.fieldPath?.message}
-                                                               errorText={errors.items?.[i]?.fieldPath?.message && translate(errors.items?.[i]?.fieldPath?.message)}
-                                                               label={translate('operator_label')}
-                                                               className={`${getStyleItem(i)}`}
-                                                        >
-                                                            <Input  {...field}/>
-                                                        </Field>
-                                                        :
-                                                        <Field required
-                                                               invalid={!!errors.items?.[i]?.fieldPath?.message}
-                                                               errorText={errors.items?.[i]?.fieldPath?.message && translate(errors.items?.[i]?.fieldPath?.message)}
-                                                               label={translate('operator_label')}
-                                                               w={"full"}
-                                                               className={`${getStyleItem(i)}`}
-                                                        >
-                                                            <SelectRoot
-                                                                name={field.name}
-                                                                value={[field.value]}
-                                                                onValueChange={({value}) => {
-                                                                    console.log(value[0])
-                                                                    if (value[0]) {
-                                                                        field.onChange(value[0])
-                                                                    } else {
-                                                                        field.onChange('')
-                                                                    }
-
-
-                                                                }}
-                                                                onInteractOutside={() => field.onBlur()}
-                                                                collection={createItems()}>
-                                                                <SelectTrigger>
-                                                                    <SelectValueText/>
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {createItems().items.map(value => (
-                                                                        <SelectItem key={value.value}
-                                                                                    item={value.value}>
-                                                                            {value.label}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </SelectRoot>
-                                                        </Field>
+                                                    // !(fileUploaded && fileData) ?
+                                                    <Field required
+                                                           w={"full"}
+                                                           invalid={!!errors.items?.[i]?.fieldPath?.message}
+                                                           errorText={errors.items?.[i]?.fieldPath?.message && translate(errors.items?.[i]?.fieldPath?.message)}
+                                                           label={translate('operator_label')}
+                                                           className={`${getStyleItem(i)}`}
+                                                    >
+                                                        <Input  {...field}/>
+                                                    </Field>
+                                                    // :
+                                                    // <Field required
+                                                    //        invalid={!!errors.items?.[i]?.fieldPath?.message}
+                                                    //        errorText={errors.items?.[i]?.fieldPath?.message && translate(errors.items?.[i]?.fieldPath?.message)}
+                                                    //        label={translate('operator_label')}
+                                                    //        w={"full"}
+                                                    //        className={`${getStyleItem(i)}`}
+                                                    // >
+                                                    //     <SelectRoot
+                                                    //         name={field.name}
+                                                    //         value={[field.value]}
+                                                    //         onValueChange={({value}) => {
+                                                    //             console.log(value[0])
+                                                    //             if (value[0]) {
+                                                    //                 field.onChange(value[0])
+                                                    //             } else {
+                                                    //                 field.onChange('')
+                                                    //             }
+                                                    //
+                                                    //
+                                                    //         }}
+                                                    //         onInteractOutside={() => field.onBlur()}
+                                                    //         collection={createItems()}>
+                                                    //         <SelectTrigger>
+                                                    //             <SelectValueText/>
+                                                    //         </SelectTrigger>
+                                                    //         <SelectContent>
+                                                    //             {createItems().items.map(value => (
+                                                    //                 <SelectItem key={value.value}
+                                                    //                             item={value.value}>
+                                                    //                     {value.label}
+                                                    //                 </SelectItem>
+                                                    //             ))}
+                                                    //         </SelectContent>
+                                                    //     </SelectRoot>
+                                                    // </Field>
                                                 )}
                                                 control={control} name={`items.${i}.fieldPath`}/>
 

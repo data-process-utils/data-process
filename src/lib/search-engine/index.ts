@@ -1,7 +1,6 @@
-import {JsonSearchEngine} from "@/lib/search-engine/json-engine";
-import {SearchEngine} from "@/types/search-engine";
+import {SearchEngine} from "@/lib/search-engine/search-engine";
 import {FileType} from "@/types/files";
-
+import {JsonSearchEngine} from "@/lib/search-engine/json-engine";
 
 
 export class SearchEngineFactory {
