@@ -14,14 +14,14 @@ import {Field} from "@/components/ui/field";
 import {Checkbox} from "@/components/ui/checkbox";
 import {getType} from "@/types/files";
 import {InputFile} from "@/components/ui/input-file";
-import {FormData, schema} from "@/lib/json-filter/schema";
+import {FilterDataFormData, schema} from "@/lib/json-filter/schema";
 import {operatorTranslator} from "@/lib/json-filter/translations";
 
 
 export default function Home() {
     const {translate} = useTranslator()
 
-    const form = useForm<FormData>({
+    const form = useForm<FilterDataFormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             items: [
@@ -49,53 +49,67 @@ export default function Home() {
 
     // const fileUploaded = watch('jsonFile')
 
-    const onSubmit = async (data: FormData) => {
+    const onSubmit = async (data: FilterDataFormData) => {
         console.log(data)
         const file = data.jsonFile as File
-        const fileContent = await file.arrayBuffer()
+        // const fileContent = await
         const fileType = getType(file)
 
-        const requestData: DataFilterRequest = {
-            fileContent: fileContent,
-            filetype: fileType,
-            params: createParams(data),
-        }
 
-        const result = await fetch('/json-filter', {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('params', JSON.stringify(createParams(data)));
+        formData.append('type', fileType);
+
+
+
+        // const requestData: DataFilterRequest = {
+        //     fileContent: fileContent,
+        //     filetype: fileType,
+        //     params: createParams(data),
+        // }
+        //
+
+        await fetch('/json-filter', {
             method: 'POST',
-            body: JSON.stringify(requestData),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(async r => {
-            const response = r.body
-            if (response) {
-                console.log(response)
-                const decoder = new TextDecoder()
-                const result = decoder.decode(await readStreamData(response))
-                console.log(result)
-                return JSON.parse(result)
-            }
-            return null
+            body: formData
         })
-        if (data) {
 
-            console.log(result)
-
-
-            const fileResult: string
-                = JSON.stringify(result, null, 4)
-
-            const blob = new Blob([fileResult], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `result-.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+        // const result = await fetch('/json-filter', {
+        //     method: 'POST',
+        //     body: JSON.stringify(requestData),
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // }).then(async r => {
+        //     const response = r.body
+        //     if (response) {
+        //         console.log(response)
+        //         const decoder = new TextDecoder()
+        //         const result = decoder.decode(await readStreamData(response))
+        //         console.log(result)
+        //         return JSON.parse(result)
+        //     }
+        //     return null
+        // })
+        // if (data) {
+        //
+        //     console.log(result)
+        //
+        //
+        //     const fileResult: string
+        //         = JSON.stringify(result, null, 4)
+        //
+        //     const blob = new Blob([fileResult], {type: 'application/json'});
+        //     const url = URL.createObjectURL(blob);
+        //     const link = document.createElement('a');
+        //     link.href = url;
+        //     link.download = `result-.json`;
+        //     document.body.appendChild(link);
+        //     link.click();
+        //     document.body.removeChild(link);
+        //     URL.revokeObjectURL(url);
+        // }
     };
 
 
@@ -129,7 +143,7 @@ export default function Home() {
     }
 
 
-    function createParams(param: FormData) {
+    function createParams(param: FilterDataFormData) {
         return param.items.map(item => {
             return {
                 field: item.fieldPath,

@@ -7,7 +7,7 @@ export class JsonSearchEngine<T> extends AbstractSearchEngine<T> {
     async search(params: SearchParams[], file: string) {
 
         // const data = await this.read(file)
-        console.log(` file content: ${file}`)
+        console.log(`file content: ${file}`)
         // if (!isArray(target)) {
         //     if (this.isAllMatch(params, target)) {
         //         return target;

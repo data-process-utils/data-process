@@ -36,6 +36,6 @@ export const schema = z.object({
     }))
 });
 
-export type FormData = z.infer<typeof schema>;
+export type FilterDataFormData = z.infer<typeof schema>;
 
 
