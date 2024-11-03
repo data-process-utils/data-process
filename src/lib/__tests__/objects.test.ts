@@ -1,5 +1,5 @@
 import {test, expect} from "vitest";
-import {getValuesInArray} from "@/lib/objects.ts";
+import {getValuesInArray} from "@/lib/objects";
 
 
 const logValues =  process.env.NODE_ENV !== "production"

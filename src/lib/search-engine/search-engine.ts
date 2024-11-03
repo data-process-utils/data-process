@@ -1,6 +1,8 @@
 import {Operator} from "@/types/filter-data";
 import {isEqual, isGreaterThanOrEqual} from "@/lib/values";
 import {containsArray, getValueInPath, getValuesInArray, isArray} from "@/lib/objects";
+import {FileType, read} from "@/types/files";
+
 
 export type SearchParams = {
     field: string,
@@ -9,20 +11,33 @@ export type SearchParams = {
 }
 
 
-export type DataFilterRequest= {
+export type DataFilterRequest = {
     params: SearchParams[],
-    targetData: unknown | unknown[]
+    fileContent: ArrayBuffer,
+    filetype: FileType
 }
 
 export interface SearchEngine<T> {
-    search(params: SearchParams[], target: T | T[]):T | T[];
-
+    search(params: SearchParams[], file: string): Promise<T | T[]>;
 }
 
 
 export abstract class AbstractSearchEngine<T> implements SearchEngine<T> {
 
-    abstract search(params: SearchParams[], target: T | T[]):T | T[];
+    abstract search(params: SearchParams[], file: string): Promise<T | T[]>;
+
+
+    protected read(file: File) {
+        return read(file, 'arrayBuffer')
+    }
+
+    protected decode(buffer: ArrayBuffer) {
+        return new TextDecoder().decode(buffer);
+    }
+
+    private parseAsJson(text: string) {
+        return JSON.parse(text);
+    }
 
 
     protected isMatch(searchParams: SearchParams, target: T | T[]): boolean {

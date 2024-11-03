@@ -1,6 +1,6 @@
 import {ReactElement} from "react";
 import {Code} from "react-feather";
-import {TranslationKeys} from "@/i18n/locales/tranlation";
+import {TranslationKeys} from "@/i18n/tranlation";
 
 
 type RouteInfo = {

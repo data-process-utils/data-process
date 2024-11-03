@@ -1,4 +1,4 @@
-import {getKeys, isArray} from "@/lib/objects.ts";
+import {getKeys, isArray} from "@/lib/objects";
 
 function isEqual(a: unknown, b: unknown): boolean {
     // Se os valores são diferentes, retorna false
